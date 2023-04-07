@@ -1,29 +1,29 @@
-function Border = CFAR(S,a,b,c)
-%Функция, осуществляющая формирование порога на основе CFAR-алгоритма
-% S - входной массив данных (спектр сигнала)
-% a - размер зоны вычисления, ячейка
-% b - размер зоны обнуления (мертвая зона), ячейка
-% c - поднятие порога, доли
-% Border - выходной массив данных (готовый порог)
+function Treshold = CFAR(Input,guard,train,gain,value,mode)
+% Р”Р°РЅРЅР°СЏ С„СѓРЅРєС†РёСЏ РІС‹С‡РёСЃР»СЏРµС‚ Р·РЅР°С‡РµРЅРёСЏ CFAR-РїРѕСЂРѕРіР° РґР»СЏ РѕРґРЅРѕРјРµСЂРЅРѕРіРѕ РјР°СЃСЃРёРІР°
+%   Р’С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ:
+%       Input    - РІС…РѕРґРЅРѕР№ РјР°СЃСЃРёРІ РґР°РЅРЅС‹С…, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ РІС‹С‡РёСЃР»СЏРµС‚СЃСЏ РїРѕСЂРѕРі
+%       guard    - РєРѕР»РёС‡РµСЃС‚РІРѕ "РјРµСЂС‚РІС‹С…" СЏС‡РµРµРє
+%       train    - РєРѕР»РёС‡РµСЃС‚РІРѕ "Р¶РёРІС‹С…" СЏС‡РµРµРє
+%       gain     - Р·РЅР°С‡РµРЅРёРµ, РЅР° РєРѕС‚РѕСЂРѕРµ СѓРјРЅРѕР¶Р°РµС‚СЃСЏ РїРѕСЂРѕРі
+%       value    - Р·РЅР°С‡РµРЅРёРµ, РЅР° РєРѕС‚РѕСЂРѕРµ РїСЂРёРїРѕРґРЅРёРјР°РµС‚СЃСЏ РїРѕСЂРѕРі
+%       mode     - СЂРµР¶РёРј РІС‹С‡РёСЃР»РµРЅРёР№: СЃСѓРјРјР° РёР»Рё СЃСЂРµРґРЅРµРµ
+%   Р’С‹С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ:
+%       Treshold - РІС‹С‡РёСЃР»РµРЅРЅС‹Р№ РїРѕСЂРѕРі
 
-Border = zeros(1,length(S));
-for i = 1:length(S)
-    if i<=(a+b)
-        if i<=(b+1)
-            Border(i) = sum(S(i+b+1:i+a+b));
-        else
-            Border(i) = sum(S(1:i-b-1))+sum(S(i+b+1:i+a+b));
-        end
-    elseif i>(length(S)-(a+b))
-        if i>=(length(S)-b)
-            Border(i) = sum(S(i-a-b:i-b-1));
-        else
-            Border(i) = sum(S(i-a-b:i-b-1))+sum(S(i+b+1:end));
-        end
+Treshold = zeros(size(Input));
+for i = 1:length(Input)
+    win = [i-guard-train:i-guard-1, i+guard+1:i+guard+train];
+    win(win<1) = [];
+    win(win>length(Input)) = [];
+    if isequal(mode, "sum")
+        Treshold(i) = sum(Input(win));
+    elseif isequal(mode, "mean")
+        Treshold(i) = mean(Input(win));
     else
-        Border(i) = sum(S(i-a-b:i-b-1)+S(i+b+1:i+a+b));
+        error("Error. Invalid mode '%s'.", mode);
     end
 end
-Border = c*Border;
+Treshold = gain*Treshold+value;
 
 end
+

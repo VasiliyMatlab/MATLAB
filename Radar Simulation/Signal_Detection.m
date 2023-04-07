@@ -88,7 +88,7 @@ pause;
 
 %% 5. CFAR-обработка
 % Вычисление порога
-Porog = CFAR(SFA_input,3,1,0.85);
+Porog = CFAR(SFA_input,3,2,1,0,"sum");
 
 % Отображение порога
 subplot(2,1,1);
